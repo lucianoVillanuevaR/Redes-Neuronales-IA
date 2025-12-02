@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.model_selection import train_test_split
 
 print("Librerías importadas correctamente.")
 print("Directorio actual:", os.getcwd())
@@ -50,6 +51,25 @@ print("Forma de y_test:", y_test.shape)
 print("Normalizando pixeles...")
 X_train = X_train.astype("float32") / 255.0
 X_test = X_test.astype("float32") / 255.0
+
+# ============================================================================
+# Crear conjunto de validación (para evitar overfitting y usar early stopping)
+# ============================================================================
+print("Creando conjunto de validación (80% train / 20% validación sobre el train)...")
+# Usamos stratify para mantener la proporción de clases
+X_train, X_val, y_train, y_val = train_test_split(
+    X_train, y_train, test_size=0.2, random_state=42, stratify=y_train
+)
+
+print(f"✓ Train final: {X_train.shape}, Validación: {X_val.shape}")
+
+# Mostrar claramente las decisiones requeridas por el enunciado:
+print("\nDECISIONES (a declarar en el informe):")
+print("- Arquitecturas evaluadas: varias (ej. (128,64), (256,128), (128,64) tanh, (256,128) alpha alto)")
+print("- Funciones de activación probadas: ReLU, tanh")
+print("- Función de error: Cross-Entropy (implícita en MLPClassifier para clasificación multiclase)")
+print("- Iteraciones máximas (por modelo): definidas en cada configuración (max_iter)")
+
 
 # 3. Definir distintos modelos a probar
 modelos = [
@@ -103,14 +123,21 @@ for cfg in modelos:
         learning_rate_init=0.001,
         max_iter=cfg["max_iter"],
         alpha=cfg["alpha"],
+        # Para ayudar a evitar overfitting usamos early stopping
+        early_stopping=True,
+        validation_fraction=0.1,  # 10% del train usado internamente para early stopping
+        n_iter_no_change=10,
         verbose=True,
         random_state=42
     )
 
     mlp.fit(X_train, y_train)
+    # Evaluar en train/val/test
+    train_accuracy = mlp.score(X_train, y_train)
+    val_accuracy = mlp.score(X_val, y_val)
     test_accuracy = mlp.score(X_test, y_test)
 
-    print(f"{cfg['nombre']} - Test Accuracy: {test_accuracy:.4f}")
+    print(f"{cfg['nombre']} - Train Acc: {train_accuracy:.4f}, Val Acc: {val_accuracy:.4f}, Test Acc: {test_accuracy:.4f}")
     print(f"Iteraciones realizadas: {mlp.n_iter_}")
 
     resultados.append({
@@ -119,6 +146,8 @@ for cfg in modelos:
         "activacion": cfg["activation"],
         "max_iter": cfg["max_iter"],
         "alpha": cfg["alpha"],
+        "train_accuracy": train_accuracy,
+        "val_accuracy": val_accuracy,
         "test_accuracy": test_accuracy,
         "iteraciones": mlp.n_iter_,
         "modelo": mlp
