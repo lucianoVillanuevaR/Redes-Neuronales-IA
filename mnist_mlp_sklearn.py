@@ -2,9 +2,7 @@ print("=== INICIO SCRIPT MLP ===")
 
 import time
 start_time = time.time()
-
 print("Importando librerías...")
-
 import os
 import pandas as pd
 import numpy as np
@@ -24,7 +22,6 @@ print("Directorio actual:", os.getcwd())
 print("Cargando train.csv y test.csv...")
 
 try:
-    # sep=None + engine="python" deja que pandas detecte el separador (coma, punto y coma, tab, etc.)
     train = pd.read_csv("train.csv", sep=None, engine="python", header=None)
     test = pd.read_csv("test.csv", sep=None, engine="python", header=None)
 except FileNotFoundError as e:
@@ -53,12 +50,7 @@ print("Forma de y_test:", y_test.shape)
 print("Normalizando pixeles...")
 X_train = X_train.astype("float32") / 255.0
 X_test = X_test.astype("float32") / 255.0
-
-# ============================================================================
-# Crear conjunto de validación (para evitar overfitting y usar early stopping)
-# ============================================================================
 print("Creando conjunto de validación (80% train / 20% validación sobre el train)...")
-# Usamos stratify para mantener la proporción de clases
 X_train, X_val, y_train, y_val = train_test_split(
     X_train, y_train, test_size=0.2, random_state=42, stratify=y_train
 )
@@ -72,8 +64,6 @@ print("- Funciones de activación probadas: ReLU, tanh")
 print("- Función de error: Cross-Entropy (implícita en MLPClassifier para clasificación multiclase)")
 print("- Iteraciones máximas (por modelo): definidas en cada configuración (max_iter)")
 
-
-# 3. Definir distintos modelos a probar
 modelos = [
     {
         "nombre": "Modelo A (base)",
@@ -107,7 +97,7 @@ modelos = [
 
 resultados = []
 
-# 4. Entrenar cada modelo y guardar resultados
+# Entrenar cada modelo y guardar resultados
 for cfg in modelos:
     print("\n==============================")
     print("Entrenando", cfg["nombre"])
@@ -134,7 +124,7 @@ for cfg in modelos:
     )
 
     mlp.fit(X_train, y_train)
-    # Evaluar en train/val/test
+    # Evaluar en train/val/test creo que funciona
     train_accuracy = mlp.score(X_train, y_train)
     val_accuracy = mlp.score(X_val, y_val)
     test_accuracy = mlp.score(X_test, y_test)
@@ -155,7 +145,7 @@ for cfg in modelos:
         "modelo": mlp
     })
 
-# 5. Mostrar resumen final de todos los modelos
+# Mostrar resumen final de todos los modelos esta funcuncional 
 print("\n=== RESUMEN DE MODELOS ===")
 for r in resultados:
     print(
@@ -165,7 +155,7 @@ for r in resultados:
         f"test_acc={r['test_accuracy']:.4f}, iters={r['iteraciones']}"
     )
 
-# 6. Opcional: mostrar matriz de confusión y curva de pérdida del MEJOR modelo
+# esto muestra la  matriz de confusión y curva de pérdida del MEJOR modelo
 #    (el de mayor accuracy en test)
 mejor = max(resultados, key=lambda x: x["test_accuracy"])
 print("\n=== MEJOR MODELO ===")
@@ -194,12 +184,9 @@ if hasattr(mejor_mlp, "loss_curve_"):
     plt.grid(True)
     plt.show()
 
-# ============================================================================
-# Guardar resultados y artefactos para la presentación
-# ============================================================================
 print("\nGuardando resultados y artefactos...")
 
-# 1) JSON resumen de resultados
+#  JSON resumen de resultados
 results_for_json = []
 for r in resultados:
     results_for_json.append({
@@ -236,7 +223,7 @@ with open('resultados_mnist.json', 'w', encoding='utf-8') as f:
 
 print("✓ Guardado: resultados_mnist.json")
 
-# 2) Matriz de confusión (PNG)
+# Matriz de confusión (PNG)
 fig, ax = plt.subplots(figsize=(10, 8))
 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax, cbar_kws={'label': 'Cantidad'})
 ax.set_xlabel('Predicción')
@@ -247,7 +234,7 @@ plt.savefig('confusion_matrix.png', dpi=150, bbox_inches='tight')
 plt.close(fig)
 print("✓ Guardado: confusion_matrix.png")
 
-# 3) Curva de pérdida del mejor modelo (PNG)
+# Curva de pérdida del mejor modelo (PNG)
 if hasattr(mejor_mlp, 'loss_curve_'):
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(mejor_mlp.loss_curve_, linewidth=2)
@@ -260,7 +247,7 @@ if hasattr(mejor_mlp, 'loss_curve_'):
     plt.close(fig)
     print("✓ Guardado: loss_curve_best_model.png")
 
-# 4) Guardar el mejor modelo (joblib)
+# Guardar el mejor modelo (joblib)
 joblib.dump(mejor_mlp, 'best_model.joblib')
 print("✓ Guardado: best_model.joblib")
 
