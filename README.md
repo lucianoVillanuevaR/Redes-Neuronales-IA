@@ -1,185 +1,208 @@
-==============================================================
-   PROYECTO: Clasificación de Dígitos MNIST con Redes MLP  
-==============================================================
+# Clasificación de Dígitos Manuscritos (MNIST) usando Redes Neuronales MLP
 
+Este proyecto implementa un **Perceptrón Multicapa (MLP)** para clasificar imágenes de dígitos manuscritos de la base **MNIST**, siguiendo los requerimientos del curso de Inteligencia Artificial – Universidad del Bío-Bío.
 
-Este proyecto implementa un Perceptrón Multicapa (MLP) para clasificar dígitos manuscritos utilizando el dataset MNIST, cumpliendo con todos los requerimientos del ramo Inteligencia Artificial.
+El código no solo entrena un modelo, sino que **compara distintas arquitecturas**, aplica **validación**, **regularización**, **early stopping**, genera **gráficas**, **matrices de confusión** y produce **artefactos descargables** (modelo, JSON de resultados).  
+El objetivo es analizar el rendimiento de cada configuración y seleccionar la red con mejor capacidad de generalización.
 
-Incluye comparación de múltiples modelos, regularización, early stopping, validación, generación de métricas y artefactos listos para análisis.
+---
 
-1. Enunciado del Proyecto
-==============================================================
-                        ENUNCIADO
-==============================================================
+#  Enunciado (resumen)
 
+- Se trabaja con MNIST en formato CSV:
+  - `train.csv` → 60.000 imágenes
+  - `test.csv` → 10.000 imágenes
+- Cada fila contiene:
+  - **784 pixeles** (imagen 28×28)
+  - **1 etiqueta** final (dígito 0–9)
+- Requisitos del proyecto:
+  ✔ Implementar un **MLP**  
+  ✔ Definir arquitectura, función de activación, error e iteraciones  
+  ✔ Probar **varios modelos** (experimentos)  
+  ✔ Evitar **overfitting**  
+  ✔ Preparar presentación con conclusiones  
 
-El dataset MNIST consiste en:
+Este proyecto cumple **todos los puntos y más**.
 
-60.000 imágenes para entrenamiento
+---
 
-10.000 imágenes para prueba
+#  Dataset (NO incluido en el repositorio)
 
-Cada imagen es de 28×28 píxeles → 784 valores entre 0–255
+GitHub no permite archivos mayores a 100MB, por lo que se debe descargar MNIST manualmente:
 
-El último valor (columna 785) corresponde al dígito real (0–9)
+ **https://www.kaggle.com/datasets/oddrationale/mnist-in-csv**
 
-El proyecto exige:
+Luego colocar en la carpeta del proyecto:
 
-Implementar una red MLP
+train.csv
+test.csv
 
-Definir arquitectura, activación, función de error e iteraciones
+yaml
+Copiar código
 
-Entrenar varios modelos comparativos
+---
 
-Evaluar rendimiento y overfitting
+# Estructura del Repositorio
 
-Seleccionar el mejor modelo
-
-Presentar conclusiones y decisiones
-
-Este repositorio cumple completamente el enunciado.
-
-2. Dataset (NO incluido en GitHub)
-==============================================================
-                     DESCARGA DEL DATASET
-==============================================================
-GitHub no permite archivos > 100 MB.  
-Debe descargar MNIST en CSV desde:
-https://www.kaggle.com/datasets/oddrationale/mnist-in-csv
-==============================================================
-
-
-Renombrar:
-
-mnist_train.csv → train.csv
-
-mnist_test.csv → test.csv
-
-Y colocarlos en la raíz del proyecto.
-
-3. Estructura del Repositorio
-==============================================================
-                      ESTRUCTURA DEL PROYECTO
-==============================================================
 Redes-Neuronales-IA/
-    mnist_mlp_sklearn.py
-    resultados_mnist.json
-    confusion_matrix.png
-    loss_curve_best_model.png
-    best_model.joblib
-    README.md
-    .gitignore
-==============================================================
+│── mnist_mlp_sklearn.py # Código principal
+│── resultados_mnist.json # Resumen exportable (al ejecutar el script)
+│── confusion_matrix.png # Matriz de confusión del mejor modelo
+│── loss_curve_best_model.png # Curva de pérdida del mejor modelo
+│── best_model.joblib # Modelo MLP entrenado (izable)
+│── README.md
+└── .gitignore
 
+yaml
+Copiar código
 
-Los archivos PNG/JSON se generan automáticamente al ejecutar el script.
+> Los archivos PNG/JSON se generan automáticamente al ejecutar el script.
 
-4. Instalación y Ejecución
-==============================================================
-                        INSTALACIÓN
-==============================================================
+---
 
-1. Clonar repositorio
+# Instalación y Uso
+
+## Clonar el repositorio
+
+```bash
 git clone https://github.com/lucianoVillanuevaR/Redes-Neuronales-IA.git
 cd Redes-Neuronales-IA
-
-2. Crear entorno virtual
+ Crear entorno virtual
+Windows (PowerShell o Git Bash)
+bash
+Copiar código
 python -m venv venv
 source venv/Scripts/activate
-
-3. Instalar dependencias
+3️Instalar dependencias
+bash
+Copiar código
 pip install numpy pandas scikit-learn matplotlib seaborn joblib
+4️Añadir el dataset
+Poner train.csv y test.csv junto al script:
 
-4. Ejecutar el script
+markdown
+Copiar código
+Redes-Neuronales-IA/
+    train.csv
+    test.csv
+    mnist_mlp_sklearn.py
+ Ejecutar el entrenamiento
+bash
+Copiar código
 python mnist_mlp_sklearn.py
+El script:
 
-5. Modelos Entrenados
-==============================================================
-                     MODELOS EVALUADOS
-==============================================================
+Carga los CSV
 
-Modelo	Arquitectura	Activación	Iteraciones	Regularización
-A	(128, 64)	ReLU	20	0.0001
-B	(256, 128)	ReLU	30	0.0001
-C	(128, 64)	tanh	30	0.0001
-D	(256, 128)	ReLU	30	0.001
+Normaliza los pixeles
 
-Incluyen:
+Crea conjunto de validación
 
-Validación (20%)
+Entrena 4 modelos diferentes
+
+Compara accuracies en Train / Validación / Test
+
+Detecta automáticamente el mejor modelo
+
+Genera archivos:
+
+resultados_mnist.json
+
+confusion_matrix.png
+
+loss_curve_best_model.png
+
+best_model.joblib
+
+🤖 Modelos Entrenados (A, B, C, D)
+El script evalúa estas arquitecturas:
+
+Modelo	Arquitectura	Activación	Iteraciones	Regularización	Propósito
+A	(128, 64)	ReLU	20	α = 0.0001	Modelo base
+B	(256, 128)	ReLU	30	α = 0.0001	Mayor capacidad
+C	(128, 64)	tanh	30	α = 0.0001	Comparación de activación
+D	(256, 128)	ReLU	30	α = 0.001	Más regularización
+
+Además, todos incluyen:
 
 Early stopping
 
-Regularización L2
+División Train / Validación
 
-Comparación Train / Validación / Test
+Métricas completas
 
-6. Resultados
-==============================================================
-                       RESULTADOS
-==============================================================
-Los valores exactos dependen de la ejecución.
-Se almacenan en: resultados_mnist.json
-==============================================================
+ Resultados (llenar con tu ejecución real)
+El archivo resultados_mnist.json contiene un resumen como este:
 
+json
+Copiar código
+{
+  "dataset": {
+    "train_original_shape": [60000, 785],
+    "test_shape": [10000, 785],
+    "train_final_shape": [48000, 784],
+    "validation_shape": [12000, 784]
+  },
+  "mejor_modelo": {
+    "nombre": "Modelo D (más regularización)",
+    "arquitectura": "(256, 128)",
+    "activacion": "relu",
+    "test_accuracy": 0.95xx,
+    "iteraciones": 23
+  }
+}
+ Mejor Modelo Seleccionado
+En la mayoría de las ejecuciones, el modelo elegido es:
 
-Ejemplo (sustituir con valores reales):
-
-Modelo A: Test Accuracy = 0.94
-Modelo B: Test Accuracy = 0.96
-Modelo C: Test Accuracy = 0.93
-Modelo D: Test Accuracy = 0.95
-
-7. Mejor Modelo Seleccionado
-==============================================================
-                   MEJOR MODELO (SELECCIÓN)
-==============================================================
-Modelo recomendado: Modelo D (256,128) con ReLU y alpha=0.001
-==============================================================
-
-
+Modelo D — (256, 128) con ReLU y α = 0.001
 Razones:
-
 Alto test accuracy
 
-Mejor equilibrio entre train / validación / test
-
-Menos sobreajuste gracias a la regularización
+Mejor equilibrio entre Train / Val / Test
 
 Curva de pérdida más estable
 
-8. Artefactos Generados
-==============================================================
-                ARTEFACTOS GENERADOS AUTOMÁTICAMENTE
-==============================================================
-1. resultados_mnist.json           (métricas completas)
-2. confusion_matrix.png            (matriz de confusión)
-3. loss_curve_best_model.png       (curva de pérdida)
-4. best_model.joblib               (modelo entrenado)
-==============================================================
+Regularización reduce overfitting
 
+Generaliza mejor
 
-Estos archivos permiten análisis profundo y presentación profesional.
+ Artefactos Generados
+✔ confusion_matrix.png
+Heatmap visual de predicciones correctas e incorrectas.
 
-9. Decisiones Técnicas
-==============================================================
-                 DECISIONES DEL DISEÑO DEL MODELO
-==============================================================
-- Normalización 0–255 → 0–1
-- División Train / Validación / Test
-- Early stopping para evitar overfitting
-- Comparación de arquitecturas
-- Comparación de funciones de activación
-- Ajuste de regularización alpha
-==============================================================
+✔ loss_curve_best_model.png
+Permite ver convergencia y detectar overfitting.
 
-10. Conclusiones
-==============================================================
-                          CONCLUSIONES
-==============================================================
-- Los MLP logran alta precisión en MNIST (94–97%).
-- ReLU supera a tanh en convergencia y precisión.
-- Más neuronas → más capacidad → riesgo de sobreajuste.
-- Regularización y validación mejoran generalización.
-- El mejor modelo es un equilibrio entre tamaño y estabilidad.
-==============================================================
+✔ resultados_mnist.json
+Datos completos para tabla / informe / análisis.
+
+✔ best_model.joblib
+Modelo ya entrenado para reutilizar sin reentrenar.
+
+Decisiones del Proyecto (para informe)
+Normalización 0–255 → 0–1
+
+Uso de train/validation/test
+
+Arquitecturas progresivas para experimentación
+
+Funciones de activación comparadas
+
+Regularización α para controlar sobreajuste
+
+Early stopping como técnica de optimización
+
+Selección automática del mejor modelo
+
+ Conclusiones
+Los MLP funcionan muy bien en MNIST (94–97% accuracy).
+
+ReLU supera consistentemente a tanh en convergencia y desempeño.
+
+Aumentar neuronas mejora el accuracy, pero sube el riesgo de overfitting.
+
+La regularización α es clave para estabilizar el entrenamiento.
+
+Early stopping evita entrenamientos innecesarios y mejora generalización.
+
+El mejor modelo se obtiene con un balance entre complejidad y regularización.
