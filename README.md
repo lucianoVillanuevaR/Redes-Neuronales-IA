@@ -114,7 +114,7 @@ loss_curve_best_model.png
 
 best_model.joblib
 
-🤖 Modelos Entrenados (A, B, C, D)
+ Modelos Entrenados (A, B, C, D)
 El script evalúa estas arquitecturas:
 
 Modelo	Arquitectura	Activación	Iteraciones	Regularización	Propósito
