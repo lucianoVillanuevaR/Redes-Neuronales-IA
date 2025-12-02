@@ -78,7 +78,7 @@ try:
     plt.tight_layout()
     plt.savefig('confusion_from_joblib.png', dpi=150, bbox_inches='tight')
     plt.close(fig)
-    print('✓ Guardado: confusion_from_joblib.png')
+    print('Guardado: confusion_from_joblib.png')
 
     # Guardar resumen JSON
     summary = {
