@@ -9,6 +9,9 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
+import json
+import joblib
 
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import confusion_matrix, classification_report
@@ -30,7 +33,6 @@ except FileNotFoundError as e:
     print("Asegúrate de que train.csv y test.csv estén en esta carpeta:")
     print(os.getcwd())
     raise SystemExit
-
 print("Datos cargados. Tamaño Train:", train.shape, "Tamaño Test:", test.shape)
 print("Primeros 10 valores de la primera fila de train:")
 print(train.iloc[0, :10])
@@ -191,6 +193,78 @@ if hasattr(mejor_mlp, "loss_curve_"):
     plt.title(f"Curva de pérdida - {mejor['nombre']}")
     plt.grid(True)
     plt.show()
+
+# ============================================================================
+# Guardar resultados y artefactos para la presentación
+# ============================================================================
+print("\nGuardando resultados y artefactos...")
+
+# 1) JSON resumen de resultados
+results_for_json = []
+for r in resultados:
+    results_for_json.append({
+        'nombre': r['nombre'],
+        'arquitectura': r['arquitectura'],
+        'activacion': r['activacion'],
+        'max_iter': r['max_iter'],
+        'alpha': r['alpha'],
+        'train_accuracy': float(r['train_accuracy']),
+        'val_accuracy': float(r['val_accuracy']),
+        'test_accuracy': float(r['test_accuracy']),
+        'iteraciones': int(r['iteraciones'])
+    })
+
+summary = {
+    'dataset': {
+        'train_original_shape': list(train.shape),
+        'test_shape': list(test.shape),
+        'train_final_shape': list(X_train.shape),
+        'validation_shape': list(X_val.shape)
+    },
+    'mejor_modelo': {
+        'nombre': mejor['nombre'],
+        'arquitectura': mejor['arquitectura'],
+        'activacion': mejor['activacion'],
+        'test_accuracy': float(mejor['test_accuracy']),
+        'iteraciones': int(mejor['iteraciones'])
+    },
+    'modelos': results_for_json
+}
+
+with open('resultados_mnist.json', 'w', encoding='utf-8') as f:
+    json.dump(summary, f, indent=2, ensure_ascii=False)
+
+print("✓ Guardado: resultados_mnist.json")
+
+# 2) Matriz de confusión (PNG)
+fig, ax = plt.subplots(figsize=(10, 8))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax, cbar_kws={'label': 'Cantidad'})
+ax.set_xlabel('Predicción')
+ax.set_ylabel('Valor Real')
+ax.set_title(f'Matriz de Confusión - {mejor["nombre"]}')
+plt.tight_layout()
+plt.savefig('confusion_matrix.png', dpi=150, bbox_inches='tight')
+plt.close(fig)
+print("✓ Guardado: confusion_matrix.png")
+
+# 3) Curva de pérdida del mejor modelo (PNG)
+if hasattr(mejor_mlp, 'loss_curve_'):
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(mejor_mlp.loss_curve_, linewidth=2)
+    ax.set_xlabel('Iteración')
+    ax.set_ylabel('Loss')
+    ax.set_title(f'Curva de Pérdida - {mejor["nombre"]}')
+    ax.grid(True)
+    plt.tight_layout()
+    plt.savefig('loss_curve_best_model.png', dpi=150, bbox_inches='tight')
+    plt.close(fig)
+    print("✓ Guardado: loss_curve_best_model.png")
+
+# 4) Guardar el mejor modelo (joblib)
+joblib.dump(mejor_mlp, 'best_model.joblib')
+print("✓ Guardado: best_model.joblib")
+
+print("\nArtefactos guardados: resultados_mnist.json, confusion_matrix.png, loss_curve_best_model.png, best_model.joblib")
 
 end_time = time.time()
 print(f"\nTiempo total de ejecución: {end_time - start_time:.2f} segundos")
